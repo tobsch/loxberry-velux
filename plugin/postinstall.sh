@@ -3,19 +3,24 @@
 # KLF200 Plugin - Post-installation script
 # This runs after the plugin files are copied
 
-PLUGINDIR=$LBPCONFIG/klf200
-DATADIR=$LBPDATA/klf200
-LOGDIR=$LBPLOG/klf200
-BINDIR=$LBPBIN/klf200
+# Note: $LBPCONFIG, $LBPDATA, $LBPLOG already include /klf200
+# But $LBPHTMLAUTH is the parent directory, need to append plugin folder
+PLUGINDIR=$LBPCONFIG
+DATADIR=$LBPDATA
+LOGDIR=$LBPLOG
+BINDIR=$LBPBIN
+HTMLAUTHDIR=$LBPHTMLAUTH/klf200
 
 echo "<INFO> KLF200 Plugin post-installation starting..."
+echo "<INFO> PLUGINDIR=$PLUGINDIR"
+echo "<INFO> HTMLAUTHDIR=$HTMLAUTHDIR"
 
 # Create required directories
 echo "<INFO> Creating directories..."
-mkdir -p "$PLUGINDIR"
-mkdir -p "$DATADIR"
-mkdir -p "$LOGDIR"
-mkdir -p "$BINDIR"
+mkdir -p "$PLUGINDIR" 2>/dev/null || true
+mkdir -p "$DATADIR" 2>/dev/null || true
+mkdir -p "$LOGDIR" 2>/dev/null || true
+mkdir -p "$BINDIR" 2>/dev/null || true
 
 # Create default configuration if it doesn't exist
 if [ ! -f "$PLUGINDIR/klf200.json" ]; then
@@ -50,52 +55,43 @@ if [ ! -f "$PLUGINDIR/klf200.json" ]; then
   }
 }
 EOF
+    chown loxberry:loxberry "$PLUGINDIR/klf200.json"
 fi
 
 # Install Node.js dependencies
 echo "<INFO> Installing Node.js dependencies..."
-echo "<INFO> Plugin htmlauth directory: $LBPHTMLAUTH"
 
-if [ -d "$LBPHTMLAUTH" ]; then
-    cd "$LBPHTMLAUTH"
+if [ -d "$HTMLAUTHDIR" ]; then
+    cd "$HTMLAUTHDIR"
     echo "<INFO> Current directory: $(pwd)"
-    echo "<INFO> Directory contents: $(ls -la)"
 
     if [ -f "package.json" ]; then
         echo "<INFO> Found package.json, running npm install..."
-        # Run npm install and capture exit code
         npm install --production --no-audit --no-fund 2>&1 | while read line; do echo "<INFO> npm: $line"; done
-        NPM_EXIT=${PIPESTATUS[0]}
-        if [ $NPM_EXIT -eq 0 ]; then
-            echo "<OK> Node.js dependencies installed successfully."
-        else
-            echo "<ERROR> npm install failed with exit code $NPM_EXIT"
-        fi
 
-        # Verify node_modules exists
         if [ -d "node_modules" ]; then
-            echo "<OK> node_modules directory exists."
+            echo "<OK> Node.js dependencies installed."
         else
             echo "<ERROR> node_modules directory NOT created!"
         fi
     else
-        echo "<WARNING> package.json not found at $LBPHTMLAUTH"
+        echo "<WARNING> package.json not found at $HTMLAUTHDIR"
         echo "<WARNING> Files in directory: $(ls -la)"
     fi
 else
-    echo "<ERROR> Directory $LBPHTMLAUTH does not exist!"
+    echo "<ERROR> Directory $HTMLAUTHDIR does not exist!"
 fi
 
 # Set permissions
 echo "<INFO> Setting permissions..."
-chmod 755 "$BINDIR"/*  2>/dev/null || true
-chown -R loxberry:loxberry "$PLUGINDIR"
-chown -R loxberry:loxberry "$DATADIR"
-chown -R loxberry:loxberry "$LOGDIR"
+chmod 755 "$BINDIR"/* 2>/dev/null || true
+chown -R loxberry:loxberry "$PLUGINDIR" 2>/dev/null || true
+chown -R loxberry:loxberry "$DATADIR" 2>/dev/null || true
+chown -R loxberry:loxberry "$LOGDIR" 2>/dev/null || true
 
-# Install and enable systemd service
+# Install and enable systemd service (requires sudo)
 echo "<INFO> Installing systemd service..."
-cat > /etc/systemd/system/klf200.service << EOF
+sudo tee /etc/systemd/system/klf200.service > /dev/null << EOF
 [Unit]
 Description=KLF200 MQTT Bridge Daemon
 After=network.target mosquitto.service
@@ -105,7 +101,7 @@ Wants=mosquitto.service
 Type=simple
 User=loxberry
 Group=loxberry
-WorkingDirectory=$LBPHTMLAUTH
+WorkingDirectory=$HTMLAUTHDIR
 Environment=LBPCONFIG=$LBPCONFIG
 Environment=LBPDATA=$LBPDATA
 Environment=LBPLOG=$LBPLOG
@@ -118,13 +114,13 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 
-systemctl daemon-reload
-systemctl enable klf200.service
+sudo /usr/bin/systemctl daemon-reload
+sudo /usr/bin/systemctl enable klf200.service
 echo "<OK> Systemd service installed."
 
-# Add sudoers entry to allow web interface to control service
+# Add sudoers entry to allow web interface to control service (requires sudo)
 echo "<INFO> Configuring sudo permissions for service control..."
-cat > /etc/sudoers.d/klf200 << 'SUDOERS'
+sudo tee /etc/sudoers.d/klf200 > /dev/null << 'SUDOERS'
 # Allow loxberry and www-data to control klf200 service without password
 loxberry ALL=(ALL) NOPASSWD: /usr/bin/systemctl start klf200.service
 loxberry ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop klf200.service
@@ -139,7 +135,7 @@ www-data ALL=(ALL) NOPASSWD: /usr/bin/systemctl status klf200.service
 www-data ALL=(ALL) NOPASSWD: /usr/bin/journalctl
 www-data ALL=(ALL) NOPASSWD: /usr/bin/journalctl *
 SUDOERS
-chmod 440 /etc/sudoers.d/klf200
+sudo chmod 440 /etc/sudoers.d/klf200
 echo "<OK> Sudo permissions configured."
 
 # Don't start the service yet - user needs to configure first
