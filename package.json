@@ -1,6 +1,6 @@
 {
   "name": "loxberry-plugin-klf200",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "LoxBerry plugin to bridge Velux KLF-200/KLF-150 gateways to MQTT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -43,9 +43,15 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "roots": ["<rootDir>/tests"],
-    "testMatch": ["**/*.test.ts"],
-    "collectCoverageFrom": ["src/**/*.ts"],
+    "roots": [
+      "<rootDir>/tests"
+    ],
+    "testMatch": [
+      "**/*.test.ts"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts"
+    ],
     "coverageDirectory": "coverage"
   },
   "engines": {

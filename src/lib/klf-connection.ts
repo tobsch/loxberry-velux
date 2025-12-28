@@ -23,7 +23,8 @@ import {
   DeviceType,
   getDeviceType,
   klfPositionToPercent,
-  percentToKlfPosition
+  percentToKlfPosition,
+  getStatusInfo
 } from '../types';
 import { getLogger } from './logger';
 
@@ -381,6 +382,9 @@ export class KLFConnection extends EventEmitter {
     const limitMin = product.LimitationMinRaw?.[0] ?? 0;
     const limitMax = product.LimitationMaxRaw?.[0] ?? 1;
 
+    // Get human-readable status info
+    const statusInfo = getStatusInfo(product.StatusReply);
+
     return {
       nodeId: product.NodeID,
       name: product.Name,
@@ -389,7 +393,7 @@ export class KLFConnection extends EventEmitter {
       targetPosition: klfPositionToPercent(product.TargetPosition),
       moving: product.RunStatus !== 0,
       online: product.State === 1, // 1 = non-executing, ready
-      error: product.StatusReply !== 0 ? `Status: ${product.StatusReply}` : null,
+      error: statusInfo ? statusInfo.message : null,
       limitationMin: klfPositionToPercent(limitMin),
       limitationMax: klfPositionToPercent(limitMax),
       serialNumber: product.SerialNumber?.toString('hex') || '',

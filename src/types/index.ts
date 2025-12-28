@@ -226,3 +226,81 @@ export function klfPositionToPercent(klfPosition: number): number {
 export function percentToKlfPosition(percent: number): number {
   return 1 - (percent / 100);
 }
+
+/**
+ * StatusReply codes from KLF-200 API
+ * These indicate the result of the last command or current device status
+ */
+export interface StatusInfo {
+  isError: boolean;
+  message: string;
+}
+
+export const STATUS_REPLY_MAP: Record<number, StatusInfo> = {
+  0x00: { isError: false, message: 'Unknown' },
+  0x01: { isError: false, message: 'OK' },
+  0x02: { isError: true, message: 'No contact - device not responding' },
+  0x03: { isError: false, message: 'Manually operated' },
+  0x04: { isError: true, message: 'Blocked - obstacle detected' },
+  0x05: { isError: true, message: 'Wrong system key' },
+  0x06: { isError: false, message: 'Priority level locked' },
+  0x07: { isError: true, message: 'Reached wrong position' },
+  0x08: { isError: true, message: 'Error during execution' },
+  0x09: { isError: false, message: 'No execution - command ignored' },
+  0x0a: { isError: false, message: 'Calibrating' },
+  0x0b: { isError: true, message: 'Power consumption too high' },
+  0x0c: { isError: true, message: 'Power consumption too low' },
+  0x0d: { isError: true, message: 'Electrical fault' },
+  0x0e: { isError: true, message: 'Motor fault' },
+  0x0f: { isError: false, message: 'Thermal protection active' },
+  0x10: { isError: true, message: 'Product not operational' },
+  0x11: { isError: false, message: 'Filter maintenance needed' },
+  0x12: { isError: false, message: 'Battery level low' },
+  0x13: { isError: false, message: 'Target position modified' },
+  0x14: { isError: false, message: 'Mode not implemented' },
+  0x15: { isError: false, message: 'Command incompatible with movement' },
+  0x16: { isError: false, message: 'User action required' },
+  0x17: { isError: true, message: 'Dead bolt error' },
+  0x18: { isError: true, message: 'Automatic cycle engaged' },
+  0x19: { isError: false, message: 'Wrong load connected' },
+  0x1a: { isError: true, message: 'Colour not reachable' },
+  0x1b: { isError: true, message: 'Target not reachable' },
+  0x1c: { isError: true, message: 'Bad index received' },
+  0x1d: { isError: false, message: 'Command overruled' },
+  0x1e: { isError: false, message: 'Node is waiting for power' },
+  0xdf: { isError: false, message: 'Information code' },
+  0xe0: { isError: false, message: 'Limited by local user' },
+  0xe1: { isError: false, message: 'Limited by rain sensor' },
+  0xe2: { isError: false, message: 'Limited by timer' },
+  0xe3: { isError: false, message: 'Limited by UPS' },
+  0xe4: { isError: false, message: 'Limited by standby' },
+  0xe5: { isError: false, message: 'Limited by fire alarm' },
+  0xe6: { isError: false, message: 'Limited by building protection' },
+  0xe7: { isError: false, message: 'Limited by safety device' },
+  0xe8: { isError: false, message: 'Limited by emergency' },
+  0xe9: { isError: false, message: 'Limited by wind sensor' },
+  0xea: { isError: false, message: 'Limited by freeze sensor' },
+  0xeb: { isError: false, message: 'Limited by outside temperature' },
+  0xec: { isError: false, message: 'Limited by inside temperature' },
+  0xed: { isError: false, message: 'Limited by brightness' },
+  0xee: { isError: false, message: 'Limited by comfort temperature' },
+};
+
+/**
+ * Get human-readable status info from StatusReply code
+ * Returns null if status is OK (not an error or limitation)
+ */
+export function getStatusInfo(statusReply: number): StatusInfo | null {
+  // 0x00 (Unknown) and 0x01 (OK) are normal states - no message needed
+  if (statusReply === 0x00 || statusReply === 0x01) {
+    return null;
+  }
+
+  const info = STATUS_REPLY_MAP[statusReply];
+  if (info) {
+    return info;
+  }
+
+  // Unknown status code
+  return { isError: false, message: `Unknown status (${statusReply})` };
+}
