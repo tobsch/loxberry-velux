@@ -12,7 +12,7 @@ use LoxBerry::JSON;
 
 my $q = CGI->new;
 my $template_title = "Velux KLF-200 MQTT Bridge";
-my $helplink = "https://github.com/tschlottke/loxberry-plugin-klf200";
+my $helplink = "https://github.com/tobsch/loxberry-klf200";
 
 # Config file path
 my $cfgfile = "$lbpconfigdir/klf200.json";
