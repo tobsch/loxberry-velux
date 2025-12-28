@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Roof background -->
+  <polygon points="128,20 20,100 236,100" fill="#8B4513" stroke="#5D3A1A" stroke-width="3"/>
+  <polygon points="128,20 20,100 20,120 128,40 236,120 236,100" fill="#A0522D"/>
+
+  <!-- Window frame -->
+  <rect x="48" y="70" width="160" height="140" rx="4" fill="#2c5aa0" stroke="#1a3a6a" stroke-width="4"/>
+
+  <!-- Window glass -->
+  <rect x="58" y="80" width="140" height="120" fill="#87CEEB"/>
+
+  <!-- Window cross bars -->
+  <line x1="128" y1="80" x2="128" y2="200" stroke="#2c5aa0" stroke-width="6"/>
+  <line x1="58" y1="140" x2="198" y2="140" stroke="#2c5aa0" stroke-width="6"/>
+
+  <!-- Glass shine effect -->
+  <polygon points="62,84 100,84 62,130" fill="rgba(255,255,255,0.3)"/>
+
+  <!-- Handle -->
+  <rect x="118" y="150" width="20" height="8" rx="2" fill="#FFD700" stroke="#B8860B" stroke-width="1"/>
+
+  <!-- Bottom sill -->
+  <rect x="40" y="205" width="176" height="15" rx="2" fill="#2c5aa0" stroke="#1a3a6a" stroke-width="2"/>
+
+  <!-- Velux red accent -->
+  <rect x="48" y="215" width="40" height="6" rx="1" fill="#CC0000"/>
+</svg>

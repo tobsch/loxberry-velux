@@ -1,0 +1,219 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">KLF-200 Connection</h3>
+    </div>
+    <div class="panel-body">
+        <form id="configForm">
+            <div class="form-group">
+                <label for="host">KLF-200 IP Address</label>
+                <input type="text" class="form-control" id="host" name="host" value="{{host}}"
+                       placeholder="192.168.1.100" required>
+                <span class="help-block">IP address of your KLF-200 gateway</span>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" name="password"
+                       value="{{password}}" placeholder="WiFi password from device label" required>
+                <span class="help-block">Default: WiFi password printed on the KLF-200 label</span>
+            </div>
+
+            <div class="form-group">
+                <label for="port">Port</label>
+                <input type="number" class="form-control" id="port" name="port"
+                       value="{{port}}" min="1" max="65535">
+                <span class="help-block">Default: 51200 (usually doesn't need changing)</span>
+            </div>
+
+            <button type="button" class="btn btn-info" id="testConnection">
+                <i class="fa fa-plug"></i> Test Connection
+            </button>
+            <span id="testResult" class="help-block"></span>
+        </form>
+    </div>
+</div>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">MQTT Settings</h3>
+    </div>
+    <div class="panel-body">
+        <form id="mqttForm">
+            <div class="form-group">
+                <label for="topicPrefix">Topic Prefix</label>
+                <input type="text" class="form-control" id="topicPrefix" name="topicPrefix"
+                       value="{{topicPrefix}}" placeholder="klf200">
+                <span class="help-block">Prefix for all MQTT topics (e.g., klf200/devices/0/position)</span>
+            </div>
+
+            <div class="form-group">
+                <label for="qos">QoS Level</label>
+                <select class="form-control" id="qos" name="qos">
+                    <option value="0" {{#if (eq qos 0)}}selected{{/if}}>0 - At most once</option>
+                    <option value="1" {{#if (eq qos 1)}}selected{{/if}}>1 - At least once (recommended)</option>
+                    <option value="2" {{#if (eq qos 2)}}selected{{/if}}>2 - Exactly once</option>
+                </select>
+            </div>
+
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="retain" name="retain" {{#if retain}}checked{{/if}}>
+                    Retain messages
+                </label>
+                <span class="help-block">Keep last state on broker for new subscribers</span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">Options</h3>
+    </div>
+    <div class="panel-body">
+        <form id="optionsForm">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="pollingEnabled" name="pollingEnabled"
+                           {{#if pollingEnabled}}checked{{/if}}>
+                    Enable state polling
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="pollingInterval">Polling Interval (ms)</label>
+                <input type="number" class="form-control" id="pollingInterval" name="pollingInterval"
+                       value="{{pollingInterval}}" min="10000" step="1000">
+                <span class="help-block">How often to refresh device states (minimum 10000ms)</span>
+            </div>
+
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" id="autoDiscovery" name="autoDiscovery"
+                           {{#if autoDiscovery}}checked{{/if}}>
+                    Auto-discover devices on startup
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label for="logLevel">Log Level</label>
+                <select class="form-control" id="logLevel" name="logLevel">
+                    <option value="debug" {{#if (eq logLevel "debug")}}selected{{/if}}>Debug</option>
+                    <option value="info" {{#if (eq logLevel "info")}}selected{{/if}}>Info</option>
+                    <option value="warn" {{#if (eq logLevel "warn")}}selected{{/if}}>Warning</option>
+                    <option value="error" {{#if (eq logLevel "error")}}selected{{/if}}>Error</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">Service Control</h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            Service Status:
+            <span id="serviceStatus" class="label {{#if serviceRunning}}label-success{{else}}label-danger{{/if}}">
+                {{#if serviceRunning}}Running{{else}}Stopped{{/if}}
+            </span>
+        </p>
+        <div class="btn-group">
+            <button type="button" class="btn btn-success" id="startService" {{#if serviceRunning}}disabled{{/if}}>
+                <i class="fa fa-play"></i> Start
+            </button>
+            <button type="button" class="btn btn-danger" id="stopService" {{#unless serviceRunning}}disabled{{/unless}}>
+                <i class="fa fa-stop"></i> Stop
+            </button>
+            <button type="button" class="btn btn-warning" id="restartService">
+                <i class="fa fa-refresh"></i> Restart
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    <button type="button" class="btn btn-primary btn-lg" id="saveConfig">
+        <i class="fa fa-save"></i> Save Configuration
+    </button>
+    <a href="/admin/express/plugins/klf200/devices" class="btn btn-default btn-lg">
+        <i class="fa fa-list"></i> View Devices
+    </a>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Test connection
+    $('#testConnection').click(function() {
+        var btn = $(this);
+        btn.prop('disabled', true);
+        $('#testResult').html('<i class="fa fa-spinner fa-spin"></i> Testing...');
+
+        $.post('/admin/express/plugins/klf200/test', {
+            host: $('#host').val(),
+            password: $('#password').val()
+        }, function(response) {
+            if (response.success) {
+                $('#testResult').html('<span class="text-success"><i class="fa fa-check"></i> ' + response.message + '</span>');
+            } else {
+                $('#testResult').html('<span class="text-danger"><i class="fa fa-times"></i> ' + response.message + '</span>');
+            }
+            btn.prop('disabled', false);
+        }).fail(function() {
+            $('#testResult').html('<span class="text-danger"><i class="fa fa-times"></i> Request failed</span>');
+            btn.prop('disabled', false);
+        });
+    });
+
+    // Save configuration
+    $('#saveConfig').click(function() {
+        var btn = $(this);
+        btn.prop('disabled', true);
+
+        var config = {
+            host: $('#host').val(),
+            password: $('#password').val(),
+            port: $('#port').val(),
+            topicPrefix: $('#topicPrefix').val(),
+            qos: $('#qos').val(),
+            retain: $('#retain').is(':checked'),
+            pollingEnabled: $('#pollingEnabled').is(':checked'),
+            pollingInterval: $('#pollingInterval').val(),
+            autoDiscovery: $('#autoDiscovery').is(':checked'),
+            logLevel: $('#logLevel').val()
+        };
+
+        $.post('/admin/express/plugins/klf200/config', config, function(response) {
+            if (response.success) {
+                alert('Configuration saved successfully!');
+            } else {
+                alert('Failed to save configuration: ' + response.message);
+            }
+            btn.prop('disabled', false);
+        }).fail(function() {
+            alert('Failed to save configuration');
+            btn.prop('disabled', false);
+        });
+    });
+
+    // Service control
+    $('#startService').click(function() {
+        $.post('/admin/express/plugins/klf200/service/start', function(response) {
+            location.reload();
+        });
+    });
+
+    $('#stopService').click(function() {
+        $.post('/admin/express/plugins/klf200/service/stop', function(response) {
+            location.reload();
+        });
+    });
+
+    $('#restartService').click(function() {
+        $.post('/admin/express/plugins/klf200/service/restart', function(response) {
+            location.reload();
+        });
+    });
+});
+</script>

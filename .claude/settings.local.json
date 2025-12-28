@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:wiki.loxberry.de)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm run build:*)",
+      "Bash(cat:*)",
+      "Bash(./scripts/package.sh:*)",
+      "Bash(scp:*)",
+      "Bash(unzip:*)",
+      "Bash(python3:*)"
+    ]
+  }
+}

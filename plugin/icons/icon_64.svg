@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Roof background -->
+  <polygon points="32,5 5,25 59,25" fill="#8B4513" stroke="#5D3A1A" stroke-width="1"/>
+
+  <!-- Window frame -->
+  <rect x="12" y="22" width="40" height="35" rx="2" fill="#2c5aa0" stroke="#1a3a6a" stroke-width="2"/>
+
+  <!-- Window glass -->
+  <rect x="16" y="26" width="32" height="27" fill="#87CEEB"/>
+
+  <!-- Window cross bars -->
+  <line x1="32" y1="26" x2="32" y2="53" stroke="#2c5aa0" stroke-width="2"/>
+  <line x1="16" y1="40" x2="48" y2="40" stroke="#2c5aa0" stroke-width="2"/>
+
+  <!-- Handle -->
+  <rect x="29" y="42" width="6" height="3" rx="1" fill="#FFD700"/>
+
+  <!-- Bottom sill -->
+  <rect x="10" y="55" width="44" height="5" rx="1" fill="#2c5aa0"/>
+</svg>

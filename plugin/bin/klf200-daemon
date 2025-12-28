@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# KLF200 Daemon Launcher
+#
+# This script is called by systemd to start the daemon
+
+# Use LoxBerry environment variables (set by systemd service)
+PLUGINDIR="$LBPHTMLAUTH"
+
+# Check if dist/daemon.js exists
+if [ -f "$PLUGINDIR/dist/daemon.js" ]; then
+    exec /usr/bin/node "$PLUGINDIR/dist/daemon.js"
+else
+    echo "Error: daemon.js not found at $PLUGINDIR/dist/daemon.js"
+    exit 1
+fi
