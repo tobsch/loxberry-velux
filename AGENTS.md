@@ -308,6 +308,51 @@ npm run package
 # Output: klf200-{version}.zip
 ```
 
+## Release Workflow
+
+**Important**: Only create releases when explicitly requested by the user.
+
+### When to Release
+
+- Do NOT automatically create releases after code changes
+- Wait for user to explicitly request a release (e.g., "create a release", "push release to github")
+- Always bump version in both `package.json` and `plugin/plugin.cfg`
+
+### Release Steps
+
+When user requests a release:
+
+1. Bump version in `package.json` and `plugin/plugin.cfg`
+2. Build and package: `./scripts/package.sh`
+3. Commit and push changes to git
+4. Create git tag: `git tag -a v{version} -m "v{version}"`
+5. Push tag: `git push origin v{version}`
+6. Create GitHub release with the zip file:
+   ```bash
+   gh release create v{version} ./klf200-{version}.zip --title "v{version}" --notes "..."
+   ```
+
+### Release Notes Template
+
+```markdown
+## Changes
+
+- List of changes...
+
+## Installation
+
+Upload `klf200-{version}.zip` via LoxBerry Plugin Manager.
+
+## After Installation
+
+If you encounter issues, run:
+\`\`\`bash
+cd /opt/loxberry/webfrontend/htmlauth/plugins/klf200
+npm install --production
+sudo systemctl restart klf200
+\`\`\`
+```
+
 ## Deployment
 
 1. Upload ZIP via LoxBerry Plugin Manager (System → Plugin Installation)
