@@ -182,7 +182,7 @@ See [AGENTS.md](AGENTS.md) for development guidelines and project structure.
 
 ```bash
 # Clone repository
-git clone https://github.com/tobsch/loxberry-klf200.git
+git clone https://github.com/tobsch/loxberry-velux.git
 
 # Install dependencies
 npm install
@@ -314,5 +314,5 @@ journalctl -u klf200 -f
 
 ## Support
 
-- [GitHub Issues](https://github.com/tobsch/loxberry-klf200/issues)
+- [GitHub Issues](https://github.com/tobsch/loxberry-velux/issues)
 - [LoxForum](https://www.loxforum.com/)

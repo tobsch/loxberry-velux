@@ -9,7 +9,8 @@
       "Bash(./scripts/package.sh:*)",
       "Bash(scp:*)",
       "Bash(unzip:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(git remote set-url:*)"
     ]
   }
 }
